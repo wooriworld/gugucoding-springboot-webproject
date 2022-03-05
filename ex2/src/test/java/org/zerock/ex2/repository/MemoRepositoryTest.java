@@ -1,10 +1,14 @@
 package org.zerock.ex2.repository;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.zerock.ex2.entity.Memo;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -16,6 +20,22 @@ class MemoRepositoryTest {
     @Autowired
     MemoRepository memoRepository;
 
+    private List<Memo> memos = new ArrayList<>();
+
+    @BeforeEach
+    void setup() {
+        IntStream.rangeClosed(1, 3).forEach(i -> {
+            Memo memo = Memo.builder().memoText("Sample..."+i).build();
+            Memo result = memoRepository.save(memo);
+            memos.add(result);
+        });
+    }
+
+    @AfterEach
+    void teardown() {
+        memoRepository.deleteAll();
+    }
+
     @Test
     void bean() {
         assertThat(memoRepository).isNotNull();
@@ -24,35 +44,27 @@ class MemoRepositoryTest {
 
     @Test
     void create() {
-        IntStream.rangeClosed(1, 100).forEach(i -> {
-            //given
-            Memo memo = Memo.builder().memoText("Sample..."+i).build();
-
-            //when
-            memoRepository.save(memo);
-
-            //then
-        });
+        Memo memo = Memo.builder().memoText("Sample").build();
+        memoRepository.save(memo);
     }
 
     @Test
     void read() {
         //given
-        Long mno = 100L;
+        Long mno = memos.get(0).getMno();
 
         //when
         Optional<Memo> result = memoRepository.findById(mno);
 
         //then
-        Memo memo = result.get();
-        assertThat(memo).isNotNull();
-        assertThat(memo.getMno()).isEqualTo(mno);
+        Memo get = result.get();
+        assertThat(get.getMno()).isEqualTo(mno);
     }
 
     @Test
     void update() {
         //given
-        Memo memo = Memo.builder().mno(100L).memoText("Update Text").build();
+        Memo memo = memos.get(0);
 
         //when
         Memo result = memoRepository.save(memo);
@@ -64,12 +76,13 @@ class MemoRepositoryTest {
     @Test
     void delete() {
         //given
-        Long mno = 100L;
+        Long mno = memos.get(0).getMno();
 
         //when
         memoRepository.deleteById(mno);
 
         //then
-        memoRepository.findById(mno);
+        Optional<Memo> memo = memoRepository.findById(mno);
+        assertThat(memo.isEmpty()).isTrue();
     }
 }
