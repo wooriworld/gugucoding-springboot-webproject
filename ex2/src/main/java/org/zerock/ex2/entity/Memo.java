@@ -11,6 +11,7 @@ import javax.persistence.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode
 public class Memo {
 
     @Id
