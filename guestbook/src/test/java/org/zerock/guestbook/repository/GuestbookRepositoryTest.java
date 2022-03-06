@@ -9,43 +9,63 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.transaction.annotation.Transactional;
 import org.zerock.guestbook.entity.GuestBook;
 import org.zerock.guestbook.entity.QGuestBook;
 
-import java.util.Optional;
-import java.util.stream.IntStream;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-
+@Transactional
 @SpringBootTest
 class GuestbookRepositoryTest {
     // TODO 2022.03.06 WOORI 테스트 독립적으로 변경 필요
     // TODO 2022.03.06 WOORI given when then 형태로 변경
+    // TODO 2022.03.06 WOORI MOCK객체 사용하도록 변경
     @Autowired
     private GuestbookRepository guestbookRepository;
 
     @Test
     void insert() {
-        IntStream.rangeClosed(1, 300).forEach(i-> {
-            GuestBook guestBook = GuestBook.builder()
-                    .title("title..."+i)
-                    .content("content..."+i)
-                    .writer("user"+(i%10))
-                    .build();
-            System.out.println(guestbookRepository.save(guestBook));
-        });
+        //given
+        GuestBook add = GuestBook.builder().title("title1").content("content1").writer("user1").build();
+
+        //when
+        guestbookRepository.save(add);
+
+        //then
+        GuestBook get = guestbookRepository.findById(add.getGno()).get();
+        assertThat(add).isEqualTo(get);
     }
 
     @Test
     void update() {
-        Optional<GuestBook> result = guestbookRepository.findById(300L);
-        GuestBook guestBook = result.get();
-        guestBook.changeTitle("Changed Title...");
-        guestBook.changeContent("Changed Content...");
-        guestbookRepository.save(guestBook);
+        //given
+        GuestBook add1 = GuestBook.builder().title("title1").content("content1").writer("user1").build();
+        GuestBook add2 = GuestBook.builder().title("title2").content("content2").writer("user2").build();
+        guestbookRepository.save(add1);
+        guestbookRepository.save(add2);
+
+        add1.changeTitle("Changed Title...");
+
+        //when
+        guestbookRepository.save(add1);
+
+        //then
+        GuestBook get1 = guestbookRepository.findById(add1.getGno()).get();
+        GuestBook get2 = guestbookRepository.findById(add2.getGno()).get();
+
+        assertThat(add1).isEqualTo(get1);
+        assertThat(add2).isEqualTo(get2);
     }
 
     @Test
     void testQuerydsl_제목LIKE검색() {
+        //given
+        GuestBook searchTarget = GuestBook.builder().title("title1").content("content1").writer("user1").build();
+        GuestBook notSearchTarget = GuestBook.builder().title("title2").content("content2").writer("user2").build();
+        guestbookRepository.save(searchTarget);
+        guestbookRepository.save(notSearchTarget);
+
         String keyword = "1";
 
         QGuestBook qGuestBook = QGuestBook.guestBook;
@@ -55,12 +75,22 @@ class GuestbookRepositoryTest {
 
         Pageable pageable = PageRequest.of(0, 10, Sort.by("gno"));
 
-        Page<GuestBook> result = guestbookRepository.findAll(builder, pageable);
-        result.stream().forEach(System.out::println);
+        //when
+        Page<GuestBook> page = guestbookRepository.findAll(builder, pageable);
+
+        //then
+        GuestBook searchResult = page.stream().findFirst().get();
+        assertThat(searchTarget).isEqualTo(searchResult);
     }
 
     @Test
-    void testQuerydsl_제목or내용like검색_andgno는0보다크다() {
+    void testQuerydsl_제목or내용like검색_and_gno는0보다크다() {
+        //given
+        GuestBook searchTarget = GuestBook.builder().title("title1").content("content1").writer("user1").build();
+        GuestBook notSearchTarget = GuestBook.builder().title("title2").content("content2").writer("user2").build();
+        guestbookRepository.save(searchTarget);
+        guestbookRepository.save(notSearchTarget);
+
         String keyword = "1";
 
         QGuestBook qGuestBook = QGuestBook.guestBook;
@@ -73,7 +103,11 @@ class GuestbookRepositoryTest {
 
         Pageable pageable = PageRequest.of(0, 10, Sort.by("gno").descending());
 
-        Page<GuestBook> result = guestbookRepository.findAll(builder, pageable);
-        result.stream().forEach(System.out::println);
+        //when
+        Page<GuestBook> page = guestbookRepository.findAll(builder, pageable);
+
+        //then
+        GuestBook searchResult = page.stream().findFirst().get();
+        assertThat(searchTarget).isEqualTo(searchResult);
     }
 }
