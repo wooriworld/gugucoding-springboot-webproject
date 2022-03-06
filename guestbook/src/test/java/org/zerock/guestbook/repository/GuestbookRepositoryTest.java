@@ -9,20 +9,34 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import org.zerock.guestbook.entity.GuestBook;
 import org.zerock.guestbook.entity.QGuestBook;
+
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @Transactional
 @SpringBootTest
 class GuestbookRepositoryTest {
-    // TODO 2022.03.06 WOORI 테스트 독립적으로 변경 필요
-    // TODO 2022.03.06 WOORI given when then 형태로 변경
     // TODO 2022.03.06 WOORI MOCK객체 사용하도록 변경
     @Autowired
     private GuestbookRepository guestbookRepository;
+
+    @Test
+    @Rollback(value = false)
+    void insertBatch() {
+        IntStream.rangeClosed(1, 300).forEach(i-> {
+            GuestBook guestBook = GuestBook.builder()
+                    .title("title..."+i)
+                    .content("content..."+i)
+                    .writer("user"+(i%10))
+                    .build();
+            System.out.println(guestbookRepository.save(guestBook));
+        });
+    }
 
     @Test
     void insert() {
