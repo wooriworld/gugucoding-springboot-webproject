@@ -15,12 +15,12 @@
         </h1>
 
 
-       <!-- <form action="/board/list" method="get" id="searchForm">
+        <form action="/board/list" method="get" id="searchForm">
             <div class="input-group">
                 <input type="hidden" name="page" value = "1">
                 <div class="input-group-prepend">
                     <select class="custom-select" name="type">
-                        <option th:selected="${pageRequestDTO.type == null}">-&#45;&#45;&#45;&#45;&#45;&#45;</option>
+                        <option th:selected="${pageRequestDTO.type == null}">-------</option>
                         <option value="t" th:selected="${pageRequestDTO.type =='t'}" >제목</option>
                         <option value="t" th:selected="${pageRequestDTO.type =='c'}"  >내용</option>
                         <option value="t"  th:selected="${pageRequestDTO.type =='w'}" >작성자</option>
@@ -34,7 +34,7 @@
                     <button class="btn btn-outline-secondary btn-clear" type="button">Clear</button>
                 </div>
             </div>
-        </form>-->
+        </form>
 
 
 
@@ -93,7 +93,7 @@
         </ul>
 
 
-        <!--<div class="modal" tabindex="-1" role="dialog">
+        <div class="modal" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -111,9 +111,9 @@
                     </div>
                 </div>
             </div>
-        </div>-->
+        </div>
 
-        <!--<script th:inline="javascript">
+        <script th:inline="javascript">
 
             var msg = [[${msg}]];
 
@@ -137,7 +137,7 @@
             });
 
 
-        </script-->>
+        </script>
 
 
 
