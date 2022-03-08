@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <input type="file" name="uploadFiles" multiple />
+    <button class="uploadBtn">Upload</button>
+    <div class="uploadResult">
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.uploadBtn').click(function() {
+                let formData = new FormData();
+                let inputFile = $('input[type="file"]');
+                let files = inputFile[0].files;
+
+                for(let i = 0; i < files.length; i++) {
+                    console.log(files[i]);
+                    formData.append("uploadFiles", files[i]);
+                }
+
+                $.ajax({
+                    url : '/uploadAjax',
+                    processData : false,
+                    contentType : false,
+                    data : formData,
+                    type : 'POST',
+                    dataType : 'json',
+                    success : function(result) {
+                        console.log(result);
+                        showUploadImages(result);
+                    },
+                    error : function(jqXHR, textStatus, errorThrown) {
+                        console.log(textStatus);
+                    }
+                });
+            });
+
+            $('.uploadResult').on('click', '.removeBtn', function(e) {
+                let target = $(this);
+                let fileName = target.data('name');
+                let targetDiv = $(this).closest('div');
+
+                $.post('/removeFile', {fileName : fileName}, function(result) {
+                    console.log(result);
+                    if(result == true) {
+                        targetDiv.remove();
+                    }
+                });
+            });
+        });
+
+        function showUploadImages(arr) {
+            let divArea = $('.uploadResult');
+            let str= '';
+            for(let  i = 0; i < arr.length; i++) {
+                str += '<div>';
+                str += '    <img src="/display?fileName='+arr[i].thumbnailURL+'">';
+                str += '    <button class="removeBtn" data-name="'+arr[i].imageURL+'">remove</button>';
+                str += '</div>';
+                divArea.append(str);
+            }
+        }
+    </script>
+
+</body>
+</html>
