@@ -37,4 +37,4 @@ out/
 .vscode/
 
 ### User Add ###
-application.properties
+*.properties
